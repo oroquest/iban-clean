@@ -3,7 +3,7 @@
 (function(){
   const TEXTS={
     de:{
-      title_check:"Hallo bestätigen Sie Ihre bereits erfassten Daten",
+      title_check:"Bitte überprüfen Sie Ihre bereits erfassten Daten",
       subtitle_check:"Diese Angaben stammen aus Ihrem bestehenden Prozess und sind nur zur Kontrolle sichtbar.",
       field_creditor:"Gläubiger‑Nr.",
       field_firstname:"Vorname",
