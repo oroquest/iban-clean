@@ -1,15 +1,61 @@
-/* Verify-like UI tweaks */
-.topbar{max-width:960px;margin:16px auto 0;padding:8px 16px;display:flex;gap:12px;align-items:center}
-.topbar .logo{height:32px;display:block}
-.container{max-width:960px;margin:16px auto;padding:0 16px}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px 16px 8px;margin:12px 0}
-.grid.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid.one{display:grid;grid-template-columns:1fr;gap:8px}
-label{display:flex;flex-direction:column;gap:6px}
-input[disabled]{background:#f7f7f7}
-.divider{height:1px;background:#e5e7eb;margin:16px 0}
-.consents{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
-.checkbox{display:flex;gap:8px;align-items:flex-start}
-.actions{display:flex;align-items:center;gap:16px;margin-top:12px}
-.small{font-size:.875rem}
-@media (max-width:720px){.grid.two{grid-template-columns:1fr} .topbar{margin-top:8px} .topbar .logo{height:28px}}
+/* Verify-like UI tweaks (stricter to override generic css) */
+.topbar{
+  max-width: 960px;
+  margin: 16px auto 0;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar .logo{ height: 40px; display:block; }
+
+.container{ max-width: 960px; margin: 16px auto; padding: 0 16px; }
+
+.card{
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.grid.two{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid.one{ display: grid; grid-template-columns: 1fr; gap: 8px; }
+label{ display: flex; flex-direction: column; gap: 6px; }
+
+/* Divider like verify */
+.divider{ height: 1px; background:#e5e7eb; margin: 16px 0; }
+
+/* Consent block */
+.consents{ border:0; padding:0; margin:0; display:flex; flex-direction:column; gap: 10px; }
+.consents .checkline{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.35;
+}
+.consents input[type="checkbox"]{ width: 18px; height: 18px; }
+
+/* Button style like verify */
+.actions{ display:flex; align-items:center; gap:16px; margin-top: 8px; }
+.btn-primary{
+  background:#111827;
+  color:#fff;
+  border: 1px solid #111827;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover{ filter: brightness(0.95); }
+
+/* Inputs */
+input[disabled]{ background:#f7f7f7; color:#111; }
+input, select { border-radius: 10px; }
+
+@media (max-width: 720px){
+  .grid.two{ grid-template-columns: 1fr; }
+  .topbar{ margin-top: 8px; }
+  .topbar .logo{ height: 34px; }
+}
