@@ -24,52 +24,25 @@
     </section>
     <hr/>
     <section>
-      <section>
-  <h2>IBAN erfassen</h2>
-  <form id="ibanForm" method="POST" action="/.netlify/functions/iban_submit" novalidate>
-    <label>IBAN*
-      <input id="iban" name="iban" required maxlength="34" placeholder="CH93 0076 2011 6238 5295 7" />
-      <span id="ibanErr" class="error" style="color:#b00020;display:none">Bitte eine gültige IBAN eingeben (Format & Prüfsumme).</span>
-    </label>
-
-    <!-- Hidden Felder wie im Verify-Prozess -->
-    <input type="hidden" id="hid_id" name="id" />
-    <input type="hidden" id="hid_token" name="token" />
-    <input type="hidden" id="hid_em" name="em" />
-    <input type="hidden" id="hid_lang" name="lang" />
-
-    <div class="checks">
-      <label><input type="checkbox" id="cb1" required /> Ich bestätige, dass die Angaben korrekt sind.</label>
-      <label><input type="checkbox" id="cb2" required /> Ich stimme der Verarbeitung gemäss Datenschutzhinweisen zu.</label>
-    </div>
-
-    <button type="submit">Senden</button>
-    <p class="small"><a href="/privacy.html" target="_blank" rel="noopener">Datenschutzhinweise</a></p>
-  </form>
-</section>
-
-<script>
-  function ibanSanitize(s){ return String(s||'').toUpperCase().replace(/\s+/g,''); }
-  function toNum(ch){ const c=ch.charCodeAt(0); if(c>=48&&c<=57) return ch; if(c>=65&&c<=90) return String(c-55); return ''; }
-  function mod97Str(str){ let rem=0,buf=''; for(const ch of str){ buf+=toNum(ch); while(buf.length>=7){ rem = Number(String(rem)+buf.slice(0,7))%97; buf = buf.slice(7);} } if(buf.length) rem = Number(String(rem)+buf)%97; return rem; }
-  function ibanIsValid(raw){ const s=ibanSanitize(raw); if(!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(s)) return false; const rearr=s.slice(4)+s.slice(0,4); return mod97Str(rearr)===1; }
-  function formatIBAN(raw){ return ibanSanitize(raw).replace(/(.{4})/g,'$1 ').trim(); }
-
-  const qs = new URLSearchParams(location.search);
-  document.getElementById('hid_id').value    = (qs.get('id')||'').trim();
-  document.getElementById('hid_token').value = (qs.get('token')||'').trim();
-  document.getElementById('hid_em').value    = (qs.get('em')||'').trim();
-  document.getElementById('hid_lang').value  = (qs.get('lang')||'de').toLowerCase();
-
-  const $iban = document.getElementById('iban');
-  const $err  = document.getElementById('ibanErr');
-  $iban.addEventListener('input', () => { $iban.value = formatIBAN($iban.value); });
-  document.getElementById('ibanForm').addEventListener('submit', (ev) => {
-    $err.style.display = 'none';
-    if (!ibanIsValid($iban.value)) { ev.preventDefault(); $err.style.display = 'inline'; return; }
-    $iban.value = ibanSanitize($iban.value); // ohne Leerzeichen senden
-  });
-</script>
+      <h2>IBAN erfassen</h2>
+      <form id="ibanForm" method="POST" action="/.netlify/functions/iban_submit" novalidate>
+        <label>IBAN*<input id="iban" name="iban" required maxlength="34" placeholder="CH93 0076 2011 6238 5295 7" /></label>
+        <label>BIC (optional)<input id="bic" name="bic" maxlength="11" placeholder="ZKBKCHZZ80A" /></label>
+        <label>Kontoinhaber (optional)<input id="acc_holder" name="glaeubiger" autocomplete="name" /></label>
+        <input type="hidden" id="hid_id" name="id" />
+        <input type="hidden" id="hid_token" name="token" />
+        <input type="hidden" id="hid_em" name="em" />
+        <input type="hidden" id="hid_lang" name="lang" />
+        <div class="checks">
+          <label><input type="checkbox" id="cb1" required /> Ich bestätige, dass die Angaben korrekt sind.</label>
+          <label><input type="checkbox" id="cb2" required /> Ich stimme der Verarbeitung gemäss Datenschutzhinweisen zu.</label>
+        </div>
+        <button type="submit">Senden</button>
+        <p class="small"><a href="/privacy.html" target="_blank" rel="noopener">Datenschutzhinweise</a></p>
+      </form>
+    </section>
+  </main>
+  <script>
     function ibanSanitize(s){ return String(s||'').toUpperCase().replace(/\s+/g,''); }
     function toNum(ch){ const c=ch.charCodeAt(0); if(c>=48&&c<=57) return ch; if(c>=65&&c<=90) return String(c-55); return ''; }
     function mod97Str(str){ let rem=0,buf=''; for(const ch of str){ buf+=toNum(ch); while(buf.length>=7){ rem = Number(String(rem)+buf.slice(0,7))%97; buf = buf.slice(7);} } if(buf.length) rem = Number(String(rem)+buf)%97; return rem; }
