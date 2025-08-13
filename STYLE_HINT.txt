@@ -1,0 +1,4 @@
+/* Add to your style.css if needed:
+.site-header { max-width: 860px; margin: 16px auto; padding: 0 16px; }
+.logo { height: 40px; display:block; }
+*/
