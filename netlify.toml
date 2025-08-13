@@ -11,3 +11,9 @@
   from = "/api/iban_submit"
   to = "/.netlify/functions/iban_submit"
   status = 200
+  
+  [[redirects]]
+  from = "/api/send_iban_email"
+  to = "/.netlify/functions/send_iban_email"
+  status = 200
+
