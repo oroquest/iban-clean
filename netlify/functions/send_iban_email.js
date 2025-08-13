@@ -1,88 +1,133 @@
 // netlify/functions/send_iban_email.js
-const fetch = require("node-fetch");
-const { mj_request, gen_token } = require("./_lib");
+// Node 18+: uses global fetch (kein 'node-fetch' nötig)
+const crypto = require('crypto');
+
+function b64url(s){ return Buffer.from(s,'utf8').toString('base64url'); }
+function normLang(x){
+  const v = String(x||'de').toLowerCase();
+  if (v === 'it') return 'en';           // IT => EN (wie vereinbart)
+  return v === 'en' ? 'en' : 'de';       // default: de
+}
+function pickTemplate(uiLang, category, env){
+  const isDirect = String(category||'').toUpperCase() === 'VN DIREKT';
+  if (uiLang === 'de') return isDirect ? env.TEMPLATE_DE_IBAN_DIRECT : env.TEMPLATE_DE_IBAN_LAWYER;
+  return isDirect ? env.TEMPLATE_EN_IBAN_DIRECT : env.TEMPLATE_EN_IBAN_LAWYER;
+}
+function pickIdFromProps(p){
+  const ids = [p.glaeubiger, p.glaeubiger_nr, p.creditor_id, p.id].filter(Boolean).map(String);
+  return ids[0] || '';
+}
+function okJson(data){ return { statusCode: 200, body: JSON.stringify(data, null, 2) }; }
 
 exports.handler = async (event) => {
   try {
-    if (event.httpMethod !== "POST") {
-      return { statusCode: 405, body: "Method Not Allowed" };
+    if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+
+    const ctype = (event.headers['content-type']||'').toLowerCase();
+    let body = {};
+    if (ctype.includes('application/json')) {
+      body = JSON.parse(event.body||'{}');
+    } else {
+      body = Object.fromEntries(new URLSearchParams(event.body||''));
     }
 
-    const params = new URLSearchParams(event.body);
-    const email = params.get("email");
-    const id = params.get("id");
-    const category = params.get("category");
-    const lang = params.get("lang") || "de";
-    const send = params.get("send") || "1"; // 1=send, 0=only link
-    const dry = params.get("dry") || "0";
-
-    if (!email || !id || !category) {
-      return { statusCode: 400, body: "Missing required parameters" };
+    // Eingaben: einzelne Felder oder Liste
+    let items = [];
+    if (Array.isArray(body.list)) {
+      items = body.list;
+    } else if (body.emails) {
+      items = String(body.emails).split(',').map(e => ({ email: e.trim() })).filter(x => x.email);
+    } else if (body.email) {
+      items = [{ email: String(body.email).trim(), id: body.id, category: body.category, lang: body.lang }];
+    } else {
+      return { statusCode: 400, body: 'no_recipients' };
     }
 
-    // Token-Generierung
-    const token = gen_token();
-    const expiryDays = parseInt(process.env.IBAN_TOKEN_DAYS || "14", 10);
-    const expiry = new Date(Date.now() + expiryDays * 86400000).toISOString();
+    const dry = (String(body.dry || process.env.IBAN_TEST_MODE || '0') === '1');
 
-    // Mailjet Felder vorbereiten
-    const updateData = {
-      token_iban: token,
-      token_iban_expiry: expiry,
-      token_iban_used_at: "",
-      iban_status: "PENDING",
-      link_iban: `${process.env.BASE_IBAN_URL}/?id=${id}&token=${token}&em=${Buffer.from(email).toString("base64")}&lang=${lang}`
-    };
+    // Mailjet Basis
+    const mjAuth = 'Basic ' + Buffer.from(`${process.env.MJ_APIKEY_PUBLIC}:${process.env.MJ_APIKEY_PRIVATE}`).toString('base64');
+    const mjBase = 'https://api.mailjet.com';
+    const baseUrl = process.env.BASE_IBAN_URL || 'https://iban.sikuralife.com';
+    const tokenDays = Math.max(1, parseInt(process.env.IBAN_TOKEN_DAYS || '7', 10));
+    const defaultCategory = String(process.env.IBAN_DEFAULT_CATEGORY || 'VN DIREKT');
 
-    // Sprache NICHT überschreiben
-    // updateData.sprache = lang; // <- bewusst auskommentiert
+    const results = [];
+    for (const it of items) {
+      const email = String(it.email||'').trim().toLowerCase();
+      if (!email) { results.push({ email, ok:false, error:'missing_email' }); continue; }
 
-    if (dry !== "1") {
-      // Mailjet-Kontakt aktualisieren
-      const resUpdate = await mj_request(`/contactdata/${encodeURIComponent(email)}`, "PUT", updateData);
-      if (!resUpdate.ok) {
-        return { statusCode: 500, body: "Mailjet update failed" };
+      // Kontakt + Props laden
+      const cRes = await fetch(`${mjBase}/v3/REST/contact?Email=${encodeURIComponent(email)}`, { headers: { Authorization: mjAuth }});
+      const cJson = await cRes.json();
+      if (!cRes.ok || !cJson?.Data?.length) { results.push({ email, ok:false, error:'contact_not_found' }); continue; }
+      const contactId = cJson.Data[0].ID;
+
+      const cdRes = await fetch(`${mjBase}/v3/REST/contactdata/${contactId}`, { headers: { Authorization: mjAuth }});
+      const cdJson = await cdRes.json();
+      const props = {};
+      if (cdJson?.Data?.[0]?.Data) for (const kv of cdJson.Data[0].Data) props[kv.Name]=kv.Value;
+
+      // ID & Kategorie & UI-Sprache (nur lesen – sprache wird NIE geschrieben)
+      const creditorId = String(it.id || pickIdFromProps(props) || '').trim();
+      const category   = String(it.category || props.category || defaultCategory).toUpperCase();
+      const uiLang     = normLang(it.lang || props.sprache || 'de');
+
+      if (!creditorId) { results.push({ email, ok:false, error:'missing_id' }); continue; }
+
+      // Token erzeugen
+      const token = crypto.randomBytes(16).toString('hex');
+      const expiry = new Date(Date.now() + tokenDays*24*60*60*1000).toISOString();
+      const link = `${baseUrl}/?id=${encodeURIComponent(creditorId)}&token=${encodeURIComponent(token)}&em=${b64url(email)}&lang=${uiLang}`;
+
+      // Properties updaten (sprache bleibt unverändert)
+      const update = [
+        { Name:'token_iban',         Value: token },
+        { Name:'token_iban_expiry',  Value: expiry },
+        { Name:'token_iban_used_at', Value: '' },
+        { Name:'iban_status',        Value: 'issued' },
+        { Name:'link_iban',          Value: link }
+      ];
+      const uRes = await fetch(`${mjBase}/v3/REST/contactdata/${contactId}`, {
+        method:'PUT', headers:{ Authorization: mjAuth, 'Content-Type':'application/json' }, body: JSON.stringify({ Data: update })
+      });
+      if (!uRes.ok) {
+        results.push({ email, ok:false, error:`update_failed_${uRes.status}`, details: await uRes.text() });
+        continue;
       }
 
-      if (send === "1") {
-        // Template auswählen
-        const tpl = selectTemplate(lang, category);
-        const sendRes = await mj_request("/send", "POST", {
-          Messages: [{
-            From: { Email: process.env.MAIL_FROM_ADDRESS, Name: process.env.MAIL_FROM_NAME },
-            To: [{ Email: email }],
-            TemplateID: tpl,
-            TemplateLanguage: true,
-            Variables: { link_iban: updateData.link_iban }
-          }]
+      // E-Mail ggf. senden
+      const templateId = pickTemplate(uiLang, category, process.env);
+      if (!templateId) { results.push({ email, ok:false, uiLang, category, error:'missing_template' }); continue; }
+
+      if (!dry) {
+        const sendRes = await fetch(`${mjBase}/v3.1/send`, {
+          method: 'POST',
+          headers: { Authorization: mjAuth, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            Messages: [{
+              From: {
+                Email: process.env.MAIL_FROM_ADDRESS || process.env.MJ_FROM_EMAIL || 'no-reply@sikuralife.com',
+                Name:  process.env.MAIL_FROM_NAME    || process.env.MJ_FROM_NAME  || 'SIKURA Leben AG i.L.'
+              },
+              To: [{ Email: email }],
+              TemplateID: Number(templateId),
+              TemplateLanguage: true,
+              Variables: { link_iban: link, creditor_id: creditorId, category, ui_lang: uiLang }
+            }]
+          })
         });
         if (!sendRes.ok) {
-          return { statusCode: 500, body: "Mailjet send failed" };
+          results.push({ email, ok:false, uiLang, category, template: templateId, error:`send_failed_${sendRes.status}`, details: await sendRes.text() });
+          continue;
         }
       }
+
+      results.push({ email, ok:true, uiLang, category, template: templateId, link, sent: !dry });
     }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        ok: true,
-        url: updateData.link_iban,
-        dryRun: dry === "1"
-      })
-    };
-  } catch (err) {
-    return { statusCode: 500, body: `Error: ${err.message}` };
+    return okJson({ ok:true, dry, results });
+  } catch (e) {
+    return { statusCode: 500, body: `error:${e.message}` };
   }
 };
-
-function selectTemplate(lang, category) {
-  const cat = category.trim().toUpperCase();
-  const lng = lang.trim().toLowerCase();
-  if (lng === "de" && cat === "VN DIREKT") return parseInt(process.env.TEMPLATE_DE_IBAN_DIRECT);
-  if (lng === "de" && cat === "VN ANWALT") return parseInt(process.env.TEMPLATE_DE_IBAN_LAWYER);
-  if (lng === "it" && cat === "VN DIREKT") return parseInt(process.env.TEMPLATE_EN_IBAN_DIRECT);
-  if (lng === "it" && cat === "VN ANWALT") return parseInt(process.env.TEMPLATE_EN_IBAN_LAWYER);
-  if (lng === "en" && cat === "VN DIREKT") return parseInt(process.env.TEMPLATE_EN_IBAN_DIRECT);
-  if (lng === "en" && cat === "VN ANWALT") return parseInt(process.env.TEMPLATE_EN_IBAN_LAWYER);
-  return parseInt(process.env.TEMPLATE_EN_IBAN_DIRECT); // Fallback
-}
