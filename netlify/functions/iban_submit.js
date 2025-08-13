@@ -10,11 +10,9 @@ exports.handler = async (event)=>{
     const isJson=(event.headers['content-type']||'').includes('application/json');
     const body=isJson?JSON.parse(event.body||'{}'):Object.fromEntries(new URLSearchParams(event.body||''));
     const id=String(body.id||'').trim(); const token=String(body.token||'').trim(); const iban=sanitizeIban(body.iban||'');
-    const bic=String(body.bic||'').toUpperCase().trim(); const holder=String(body.glaeubiger||body.name||'').trim();
     const lang=String(body.lang||'de').toLowerCase(); const email=Buffer.from(String(body.em||''),'base64url').toString('utf8');
     if(!email||!id||!token||!iban) return { statusCode:400, body:'Missing fields' };
     if(!ibanIsValid(iban)) return { statusCode:422, body:'Invalid IBAN' };
-    if(bic && !/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/.test(bic)) return { statusCode:422, body:'Invalid BIC' };
 
     const mjAuth='Basic '+Buffer.from(`${process.env.MJ_APIKEY_PUBLIC}:${process.env.MJ_APIKEY_PRIVATE}`).toString('base64');
     const mjBase='https://api.mailjet.com';
@@ -37,8 +35,6 @@ exports.handler = async (event)=>{
     const ts=new Date().toISOString();
     const Data=[
       {Name:'iban',Value:iban},
-      {Name:'glaeubiger',Value:holder},
-      {Name:'bic',Value:bic},
       {Name:'ip_iban',Value:(event.headers['x-forwarded-for']||'').split(',')[0].trim()},
       {Name:'agent_iban',Value:event.headers['user-agent']||''},
       {Name:'timestamp_iban',Value:ts},
