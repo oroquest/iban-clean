@@ -77,11 +77,13 @@
     applyI18n(q_lang);
 
     const hid = (id) => document.getElementById(id);
+    if (!hid('hid_id')) return; // safety if wrong page
+
     hid('hid_id').value    = q_id;
     hid('hid_token').value = q_token;
     hid('hid_em').value    = q_em;
     hid('hid_lang').value  = q_lang;
-    hid('ro_creditor').value = q_id;
+    if (hid('ro_creditor')) hid('ro_creditor').value = q_id;
 
     // Load RO data via iban_check
     try {
@@ -90,13 +92,13 @@
       if(!r.ok) throw new Error('iban_check_failed');
       const j = await r.json();
       const p = j.display || {};
-      hid('ro_firstname').value = p.firstname || '';
-      hid('ro_lastname').value  = p.name || '';
-      hid('ro_street').value    = p.strasse || '';
-      hid('ro_houseno').value   = p.hausnummer || '';
-      hid('ro_zip').value       = p.plz || '';
-      hid('ro_city').value      = p.ort || '';
-      hid('ro_country').value   = p.land || '';
+      if (hid('ro_firstname')) hid('ro_firstname').value = p.firstname || '';
+      if (hid('ro_lastname'))  hid('ro_lastname').value  = p.name || '';
+      if (hid('ro_street'))    hid('ro_street').value    = p.strasse || '';
+      if (hid('ro_houseno'))   hid('ro_houseno').value   = p.hausnummer || '';
+      if (hid('ro_zip'))       hid('ro_zip').value       = p.plz || '';
+      if (hid('ro_city'))      hid('ro_city').value      = p.ort || '';
+      if (hid('ro_country'))   hid('ro_country').value   = p.land || '';
     } catch(e){
       alert((I18N[q_lang]||I18N.de).err_invalid_link);
     }
@@ -104,15 +106,17 @@
     // Form behaviour
     const $iban = hid('iban');
     const $err  = hid('ibanErr');
-    $iban.addEventListener('input', () => { $iban.value = ibanGroup($iban.value); });
-    document.getElementById('ibanForm').addEventListener('submit', (ev) => {
-      $err.style.display = 'none';
-      if (!ibanIsValid($iban.value)) {
-        ev.preventDefault();
-        $err.style.display = 'inline';
-        return;
-      }
-      $iban.value = ibanSanitize($iban.value);
-    });
+    if ($iban) {
+      $iban.addEventListener('input', () => { $iban.value = ibanGroup($iban.value); });
+      document.getElementById('ibanForm').addEventListener('submit', (ev) => {
+        $err.style.display = 'none';
+        if (!ibanIsValid($iban.value)) {
+          ev.preventDefault();
+          $err.style.display = 'inline';
+          return;
+        }
+        $iban.value = ibanSanitize($iban.value);
+      });
+    }
   });
 })();
