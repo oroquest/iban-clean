@@ -1,47 +1,56 @@
 
-/* Visual parity with verify – safe CSS-only overrides */
-:root {
-  --card-radius: 12px;
-  --card-border: #e5e7eb;
-  --text: #111827;
-  --muted: #6b7280;
+/* Topbar: keep HTML untouched, align logo + language above the first card */
+.topbar{
+  max-width: 960px;
+  margin: 12px auto 4px;      /* center like container, just above heading */
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* logo left, language select right */
+  gap: 16px;
 }
-.topbar .logo{ height:60px; }
-.container{ max-width:960px; margin:16px auto; padding:0 16px; }
+.topbar .logo{ height: 52px; display:block; }
+
+/* Make the language select look aligned and compact */
+.topbar select{
+  height: 36px;
+  border-radius: 10px;
+  padding: 0 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+/* Ensure first card doesn't jump under the header spacing */
+.container{ max-width: 960px; margin: 0 auto; padding: 0 16px; }
+.container .card:first-of-type{ margin-top: 8px; }
+
+/* Cards and form — unchanged from previous tuning */
 .card{
-  background:#fff; border:1px solid var(--card-border); border-radius:var(--card-radius);
-  box-shadow:0 1px 2px rgba(0,0,0,.04); padding:20px; margin:16px 0;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  padding:16px;
+  margin:12px 0;
 }
-h1{ font-size:28px; line-height:1.2; margin:0 0 8px; color:var(--text); }
-h2{ font-size:22px; line-height:1.25; margin:0 0 12px; color:var(--text); }
-.hint{ color:var(--muted); font-size:14px; margin:6px 0 12px; }
-
-.grid.two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.grid.one{ display:grid; grid-template-columns:1fr; gap:10px; }
-
-label{ display:flex; flex-direction:column; gap:6px; font-weight:600; color:var(--text); }
-label > input{
-  border-radius:12px; padding:12px 14px; font-size:16px; border:1px solid #d1d5db;
-}
+.grid.two{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
+.grid.one{ display:grid; grid-template-columns:1fr; gap:8px }
+label{ display:flex; flex-direction:column; gap:6px }
 input[disabled]{ background:#f7f7f7; color:#111; }
+input, select{ border-radius:10px; }
 
-/* Divider */
-.divider{ height:1px; background:#e5e7eb; margin:16px 0; }
-
-/* Consents block like verify */
-.consents{ border:0; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
-.consents legend{ font-size:22px; font-weight:700; margin-bottom:4px; }
-.checkline{ display:flex; align-items:center; gap:10px; font-weight:600; }
-.checkline input[type="checkbox"]{ width:18px; height:18px; }
-
-/* Button verify style */
-.actions{ display:flex; align-items:center; gap:16px; margin-top:8px; }
-.btn-primary{ background:#111827; color:#fff; border:1px solid #111827; border-radius:12px; padding:12px 18px; font-weight:700; cursor:pointer; }
-.btn-primary:hover{ filter:brightness(.95); }
-
-.small{ font-size:.9rem; }
+/* Consent row */
+.consents{ display:flex; flex-direction:column; gap:10px }
+.consents .checkline{ display:flex; align-items:center; gap:10px; }
+.actions{ display:flex; align-items:center; gap:16px; margin-top:8px }
+.btn-primary{
+  background:#111827; color:#fff; border:1px solid #111827;
+  border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer;
+}
+.btn-primary:hover{ filter:brightness(.95) }
 
 @media (max-width:720px){
-  .topbar .logo{ height:44px; }
-  .grid.two{ grid-template-columns:1fr; }
+  .topbar{ padding: 0 12px; }
+  .topbar .logo{ height: 44px; }
+  .grid.two{ grid-template-columns:1fr }
 }
