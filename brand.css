@@ -1,4 +1,4 @@
-/* Verify-like UI tweaks (stricter to override generic css) */
+/* Verify-like UI tweaks (v7) */
 .topbar{
   max-width: 960px;
   margin: 16px auto 0;
@@ -7,7 +7,7 @@
   align-items: center;
   gap: 12px;
 }
-.topbar .logo{ height: 40px; display:block; }
+.topbar .logo{ height: 60px; display:block; }
 
 .container{ max-width: 960px; margin: 16px auto; padding: 0 16px; }
 
@@ -24,20 +24,28 @@
 .grid.one{ display: grid; grid-template-columns: 1fr; gap: 8px; }
 label{ display: flex; flex-direction: column; gap: 6px; }
 
-/* Divider like verify */
 .divider{ height: 1px; background:#e5e7eb; margin: 16px 0; }
 
 /* Consent block */
-.consents{ border:0; padding:0; margin:0; display:flex; flex-direction:column; gap: 10px; }
+.consents{ border:0; padding:0; margin:0; display:flex; flex-direction:column; gap: 14px; align-items:flex-start; }
+.consents .legend-h2{ font-size: 1.5rem; line-height: 2rem; font-weight: 700; margin: 8px 0; }
 .consents .checkline{
   display: flex;
+  flex-direction: row;
   align-items: center;
+  justify-content: flex-start;
   gap: 10px;
-  line-height: 1.35;
+  width: 100%;
+  text-align: left;
 }
-.consents input[type="checkbox"]{ width: 18px; height: 18px; }
+.consents .checkline input[type="checkbox"]{
+  width: 18px; height: 18px; flex: 0 0 auto;
+}
+.consents .checkline span{
+  flex: 1 1 auto;
+}
 
-/* Button style like verify */
+/* Button style */
 .actions{ display:flex; align-items:center; gap:16px; margin-top: 8px; }
 .btn-primary{
   background:#111827;
@@ -50,12 +58,11 @@ label{ display: flex; flex-direction: column; gap: 6px; }
 }
 .btn-primary:hover{ filter: brightness(0.95); }
 
-/* Inputs */
 input[disabled]{ background:#f7f7f7; color:#111; }
 input, select { border-radius: 10px; }
 
 @media (max-width: 720px){
   .grid.two{ grid-template-columns: 1fr; }
   .topbar{ margin-top: 8px; }
-  .topbar .logo{ height: 34px; }
+  .topbar .logo{ height: 44px; }
 }
