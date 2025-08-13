@@ -23,7 +23,7 @@
 .container{ max-width: 960px; margin: 0 auto; padding: 0 16px; }
 .container .card:first-of-type{ margin-top: 8px; }
 
-/* Cards and form — unchanged from previous tuning */
+/* Cards and form */
 .card{
   background:#fff;
   border:1px solid #e5e7eb;
@@ -35,22 +35,42 @@
 .grid.two{ display:grid; grid-template-columns:1fr 1fr; gap:12px }
 .grid.one{ display:grid; grid-template-columns:1fr; gap:8px }
 label{ display:flex; flex-direction:column; gap:6px }
-input[disabled]{ background:#f7f7f7; color:#111; }
-input, select{ border-radius:10px; }
+
+/* Inputs: bigger type, more padding, stronger contrast */
+.card input,
+.card select,
+.card textarea{
+  border-radius:10px;
+  font-size:16px;              /* ++ bigger text in fields */
+  line-height:1.4;
+  padding:12px 12px;           /* ++ a bit more breathing room */
+  border:1px solid #d1d5db;    /* a touch stronger than default */
+  background:#ffffff;
+}
+input[disabled],
+select[disabled],
+textarea[disabled]{
+  background:#eef1f5;          /* ++ darker background for contrast */
+  color:#111;
+  border-color:#cbd5e1;
+}
+
+/* Divider helper if present */
+.divider{ height:1px; background:#e5e7eb; margin:16px 0; }
 
 /* Consent block — VERIFY look & feel (no HTML changes) */
 .consents > legend{
   font-size: 22px !important;     /* same as H2 */
   line-height: 1.25 !important;
   font-weight: 700 !important;
-  margin: 8px 0 12px !important;
+  margin: 16px 0 12px !important; /* ++ more space before legend */
   padding: 0 !important;
 }
 .consents{
   border: 0 !important;
   background: transparent !important;
   padding: 0 !important;
-  margin: 0 !important;
+  margin: 16px 0 0 !important;    /* ++ space before the whole consent block */
   box-shadow: none !important;
 }
 .consents label,
