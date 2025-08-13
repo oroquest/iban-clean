@@ -1,5 +1,5 @@
 // netlify/functions/send_iban_email.js
-// Node 18+: uses global fetch (kein 'node-fetch' nötig)
+// Node 18+: global fetch, kein 'node-fetch' nötig
 const crypto = require('crypto');
 
 function b64url(s){ return Buffer.from(s,'utf8').toString('base64url'); }
@@ -72,12 +72,14 @@ exports.handler = async (event) => {
       const creditorId = String(it.id || pickIdFromProps(props) || '').trim();
       const category   = String(it.category || props.category || defaultCategory).toUpperCase();
       const uiLang     = normLang(it.lang || props.sprache || 'de');
-
       if (!creditorId) { results.push({ email, ok:false, error:'missing_id' }); continue; }
 
       // Token erzeugen
       const token = crypto.randomBytes(16).toString('hex');
-      const expiry = new Date(Date.now() + tokenDays*24*60*60*1000).toISOString();
+      const expiryTs = Date.now() + tokenDays*24*60*60*1000;
+      const expiry = new Date(expiryTs).toISOString();
+
+      // Link
       const link = `${baseUrl}/?id=${encodeURIComponent(creditorId)}&token=${encodeURIComponent(token)}&em=${b64url(email)}&lang=${uiLang}`;
 
       // Properties updaten (sprache bleibt unverändert)
@@ -100,6 +102,20 @@ exports.handler = async (event) => {
       const templateId = pickTemplate(uiLang, category, process.env);
       if (!templateId) { results.push({ email, ok:false, uiLang, category, error:'missing_template' }); continue; }
 
+      // Variablen GENAU wie im Template benutzt:
+      const vars = {
+        // EN-Template erwartet verify_url:
+        verify_url: link,
+        // Zusätzliche Anzeige-Variablen (falls im Template vorhanden)
+        creditor_id: creditorId,
+        name: props.name || props.lastname || '',
+        firstname: props.firstname || '',
+        ort: props.ort || props.city || '',
+        country: props.land || props.country || '',
+        // Ablauf-Hinweis, falls {{var:expires_at}} genutzt wird
+        expires_at: new Date(expiryTs).toLocaleString('en-GB', { timeZone: 'Europe/Zurich' })
+      };
+
       if (!dry) {
         const sendRes = await fetch(`${mjBase}/v3.1/send`, {
           method: 'POST',
@@ -113,20 +129,22 @@ exports.handler = async (event) => {
               To: [{ Email: email }],
               TemplateID: Number(templateId),
               TemplateLanguage: true,
-              Variables: { link_iban: link, creditor_id: creditorId, category, ui_lang: uiLang }
+              Variables: vars
             }]
           })
         });
         if (!sendRes.ok) {
-          results.push({ email, ok:false, uiLang, category, template: templateId, error:`send_failed_${sendRes.status}`, details: await sendRes.text() });
+          results.push({ email, ok:false, uiLang, category, template: templateId, error:`send_failed_${sendRes.status}`, details: await sendRes.text(), vars });
           continue;
         }
       }
 
-      results.push({ email, ok:true, uiLang, category, template: templateId, link, sent: !dry });
+      results.push({ email, ok:true, uiLang, category, template: templateId, link, sent: !dry, vars });
     }
 
-    return okJson({ ok:true, dry, results });
+    // Ein-Empfänger-Komfort: url auf Top-Level für $r.url
+    const singleUrl = results.length === 1 && results[0].link ? results[0].link : undefined;
+    return okJson({ ok:true, dry, url: singleUrl, results });
   } catch (e) {
     return { statusCode: 500, body: `error:${e.message}` };
   }
