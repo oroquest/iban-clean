@@ -4,7 +4,7 @@
   const TEXTS={
     de:{
       title_check:"Bitte überprüfen Sie Ihre bereits erfassten Daten",
-      subtitle_check:"Die angezeigten Daten wurden im Rahmen des vorangegangenen Verfahrens erhoben und werden Ihnen hier zur Überprüfung angezeigt.",
+      subtitle_check:"Die angezeigten Daten wurden im Rahmen des vorangegangenen Verfahrens erhoben und werden zur Kontrolle angezeigt.",
       field_creditor:"Gläubiger‑Nr.",
       field_firstname:"Vorname",
       field_lastname:"Nachname",
