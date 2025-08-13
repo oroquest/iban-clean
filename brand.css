@@ -1,5 +1,15 @@
-/* Topbar wie Verify */
-.topbar{ max-width: 960px; margin: 8px auto 0; padding: 0 16px; display:flex; align-items:center; justify-content:space-between; }
-.logo{ height: 40px; display:block; }
-.lang select{ border:1px solid #ddd; border-radius:8px; padding:6px 10px; }
-.container{ max-width: 960px; margin: 24px auto; padding: 0 16px; }
+/* Verify-like UI tweaks */
+.topbar{max-width:960px;margin:16px auto 0;padding:8px 16px;display:flex;gap:12px;align-items:center}
+.topbar .logo{height:32px;display:block}
+.container{max-width:960px;margin:16px auto;padding:0 16px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px 16px 8px;margin:12px 0}
+.grid.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid.one{display:grid;grid-template-columns:1fr;gap:8px}
+label{display:flex;flex-direction:column;gap:6px}
+input[disabled]{background:#f7f7f7}
+.divider{height:1px;background:#e5e7eb;margin:16px 0}
+.consents{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.checkbox{display:flex;gap:8px;align-items:flex-start}
+.actions{display:flex;align-items:center;gap:16px;margin-top:12px}
+.small{font-size:.875rem}
+@media (max-width:720px){.grid.two{grid-template-columns:1fr} .topbar{margin-top:8px} .topbar .logo{height:28px}}
