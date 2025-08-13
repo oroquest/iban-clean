@@ -20,7 +20,7 @@
       check_privacy:"Ich stimme der Verarbeitung gemäss Datenschutzhinweisen zu.",
       btn_send:"Senden",
       link_privacy:"Datenschutzhinweise",
-      err_iban_invalid:"Bitte eine gültige IBAN eingeben (Format & Prüfsumme).",
+      err_iban_invalid:"Bitte eine gültige IBAN eingeben.",
       err_consents:"Um fortzufahren, bestätigen Sie bitte beide Kontrollkästchen."
     },
     en:{
@@ -41,7 +41,7 @@
       check_privacy:"I agree to the processing according to the privacy notice.",
       btn_send:"Submit",
       link_privacy:"Privacy notice",
-      err_iban_invalid:"Please enter a valid IBAN (format & checksum).",
+      err_iban_invalid:"Please enter a valid IBAN.",
       err_consents:"To proceed, please check both boxes."
     },
     it:{
@@ -62,7 +62,7 @@
       check_privacy:"Acconsento al trattamento dei miei dati secondo l’Informativa privacy.",
       btn_send:"Invia",
       link_privacy:"Informativa privacy",
-      err_iban_invalid:"Inserire un IBAN valido (formato e checksum).",
+      err_iban_invalid:"Inserire un IBAN valido.",
       err_consents:"Per continuare, selezioni entrambe le caselle di controllo."
     }
   };
