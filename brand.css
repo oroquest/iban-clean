@@ -1,0 +1,5 @@
+/* Topbar wie Verify */
+.topbar{ max-width: 960px; margin: 8px auto 0; padding: 0 16px; display:flex; align-items:center; justify-content:space-between; }
+.logo{ height: 40px; display:block; }
+.lang select{ border:1px solid #ddd; border-radius:8px; padding:6px 10px; }
+.container{ max-width: 960px; margin: 24px auto; padding: 0 16px; }

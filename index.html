@@ -2,20 +2,30 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IBAN – SIKURA Leben AG i.L.</title>
-  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/brand.css" />
 </head>
 <body>
   <header class="site-header">
-    <img src="./siku_logo.png" alt="SIKURA Logo" class="logo" />
+    <div class="topbar">
+      <img src="/siku_logo.png" alt="Sikura Life" class="logo" />
+      <div class="lang">
+        <label for="langSel" class="sr-only">Sprache</label>
+        <select id="langSel" aria-label="Language">
+          <option value="de">Deutsch</option>
+          <option value="en">English</option>
+          <option value="it">Italiano</option>
+        </select>
+      </div>
+    </div>
   </header>
 
   <main class="container">
-    <!-- READ-ONLY VERIFY DATA -->
     <section>
-      <h1 data-i18n="title_check">Bitte bestätigen Sie Ihre bereits erfassten Daten</h1>
-      <p class="hint" data-i18n="subtitle_check">Diese Angaben stammen aus Ihrem bestehenden Prozess und sind nur zur Kontrolle sichtbar.</p>
+      <h1><span data-i18n="title_check">Bitte bestätigen Sie Ihre bereits erfassten Daten</span></h1>
+      <p class="hint"><span data-i18n="subtitle_check">Diese Angaben stammen aus Ihrem bestehenden Prozess und sind nur zur Kontrolle sichtbar.</span></p>
       <div class="grid">
         <label><span data-i18n="field_creditor">Gläubiger‑Nr.</span>
           <input id="ro_creditor" disabled /></label>
@@ -38,15 +48,13 @@
 
     <hr/>
 
-    <!-- IBAN FORM -->
     <section>
-      <h2 data-i18n="title_iban">IBAN erfassen</h2>
+      <h2><span data-i18n="title_iban">IBAN erfassen</span></h2>
       <form id="ibanForm" method="POST" action="/.netlify/functions/iban_submit" novalidate>
         <label><span data-i18n="field_iban">IBAN*</span>
           <input id="iban" name="iban" required maxlength="34" placeholder="CH93 0076 2011 6238 5295 7" /></label>
-        <small id="ibanErr" class="error" style="display:none;color:#b00020" data-i18n="err_iban_invalid">Bitte eine gültige IBAN eingeben (Format & Prüfsumme).</small>
+        <small id="ibanErr" class="error" style="display:none;color:#b00020"><span data-i18n="err_iban_invalid">Bitte eine gültige IBAN eingeben (Format & Prüfsumme).</span></small>
 
-        <!-- Hidden: verify params -->
         <input type="hidden" id="hid_id" name="id" />
         <input type="hidden" id="hid_token" name="token" />
         <input type="hidden" id="hid_em" name="em" />
@@ -59,14 +67,12 @@
             <span data-i18n="check_privacy">Ich stimme der Verarbeitung gemäss Datenschutzhinweisen zu.</span></label>
         </div>
 
-        <button type="submit" data-i18n="btn_send">Senden</button>
-        <p class="small"><a href="./privacy.html" target="_blank" rel="noopener" data-i18n="link_privacy">Datenschutzhinweise</a></p>
+        <button type="submit"><span data-i18n="btn_send">Senden</span></button>
+        <p class="small"><a href="/privacy.html" target="_blank" rel="noopener" data-i18n="link_privacy">Datenschutzhinweise</a></p>
       </form>
     </section>
   </main>
 
-  <!-- External script (CSP-safe); RELATIVE path -->
-  <script src="./script.js" defer></script>
-  <noscript>Bitte JavaScript aktivieren.</noscript>
+  <script src="/script.js" defer></script>
 </body>
 </html>
