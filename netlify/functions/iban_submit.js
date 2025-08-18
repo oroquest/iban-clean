@@ -1,3 +1,10 @@
+// --- NEU: winziges Hardening (nur Browser, Batch unberührt) ---
+const ALLOW_ORIGINS = new Set([
+  'https://iban.sikuralife.com',
+  'https://verify.sikuralife.com'
+]);
+// ---------------------------------------------------------------
+
 function sanitizeIban(s){return String(s||'').toUpperCase().replace(/\s+/g,'');}
 function ibanIsValid(raw){const s=sanitizeIban(raw); if(!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(s)) return false;
 const rearr=s.slice(4)+s.slice(0,4); let rem=0,buf=''; const toNum=(ch)=>{const c=ch.charCodeAt(0); if(c>=48&&c<=57)return ch; if(c>=65&&c<=90)return String(c-55); return '';};
@@ -6,6 +13,23 @@ if(buf.length) rem=Number(String(rem)+buf)%97; return rem===1;}
 
 exports.handler = async (event)=>{
   try{
+    // --- NEU: Preflight sauber beantworten (beeinflusst normale POSTs nicht) ---
+    if (event.httpMethod === 'OPTIONS') {
+      return { statusCode: 204, body: '' };
+    }
+
+    // --- NEU: Nur wenn aus dem Browser (Origin/Referer vorhanden), fremde Origins blocken.
+    // Batch-/Server-zu-Server-Calls haben i.d.R. keinen Origin/Referer -> bleiben unberührt.
+    const hdr = event.headers || {};
+    const isBrowser = !!(hdr.origin || hdr.referer);
+    if (isBrowser) {
+      const origin = hdr.origin || '';
+      if (!ALLOW_ORIGINS.has(origin)) {
+        return { statusCode: 403, body: 'forbidden' };
+      }
+    }
+    // ---------------------------------------------------------------------------
+
     if(event.httpMethod!=='POST') return { statusCode:405, body:'Method Not Allowed' };
     const isJson=(event.headers['content-type']||'').includes('application/json');
     const body=isJson?JSON.parse(event.body||'{}'):Object.fromEntries(new URLSearchParams(event.body||''));
