@@ -1,3 +1,9 @@
+// --- NEU: winziges Hardening (nur Browser, Batch unberührt) ---
+const ALLOW_ORIGINS = new Set([
+  'https://iban.sikuralife.com',
+  'https://verify.sikuralife.com'
+]);
+// ---------------------------------------------------------------
 
 // iban_check.js - validates IBAN token link and returns read-only display data.
 // Uses native fetch (Node 18/20). No external deps.
@@ -12,6 +18,23 @@ function b64urlDecode(s){
 
 exports.handler = async (event) => {
   try {
+    // --- NEU: Preflight sauber beantworten (neutral, beeinflusst GET nicht) ---
+    if (event.httpMethod === 'OPTIONS') {
+      return { statusCode: 204, body: '' };
+    }
+
+    // --- NEU: Nur wenn aus dem Browser (Origin/Referer vorhanden), fremde Origins blocken.
+    // Server-to-Server-/Batch-Calls haben i.d.R. keinen Origin/Referer -> bleiben unberührt.
+    const hdr = event.headers || {};
+    const isBrowser = !!(hdr.origin || hdr.referer);
+    if (isBrowser) {
+      const origin = hdr.origin || '';
+      if (!ALLOW_ORIGINS.has(origin)) {
+        return { statusCode: 403, body: JSON.stringify({ ok:false, error:'forbidden' }) };
+      }
+    }
+    // ---------------------------------------------------------------------------
+
     if (event.httpMethod !== 'GET') return { statusCode: 405, body: 'Method Not Allowed' };
     const qs = event.queryStringParameters || {};
     const id = String(qs.id||'').trim();
