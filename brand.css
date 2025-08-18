@@ -143,3 +143,11 @@ textarea[disabled]{
 /* Feldtitel in Karten luftiger */
 .card h2 { margin-top: 6px !important; }
 
+/* Labels fett machen wie im VERIFY-Formular */
+.card label {
+  font-weight: 600;   /* etwas weniger stark als 700 -> harmonischer */
+  color: #111;        /* kräftiger Farbton für bessere Lesbarkeit */
+  font-size: 15px;    /* optional: leicht größer für bessere Balance */
+}
+
+
