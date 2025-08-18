@@ -108,3 +108,38 @@ textarea[disabled]{
   .topbar .logo{ height: 44px; }
   .grid.two{ grid-template-columns:1fr }
 }
+
+/* === Read-only Daten optisch wie im VERIFY: nicht fett, etwas grösser === */
+
+/* Label-Typo (Feldbezeichnungen) */
+.card label{
+  font-weight: 400 !important;    /* normal statt fett */
+  font-size: 15px !important;     /* leicht grösser */
+  color: #111 !important;
+}
+
+/* Inputs allgemein (noch einheitlich grösser) */
+.card input,
+.card select,
+.card textarea{
+  font-size: 16px !important;
+}
+
+/* Read-only Felder (disabled): grösser & gut lesbar */
+.card input[disabled],
+.card select[disabled],
+.card textarea[disabled]{
+  font-size: 17px !important;     /* +1 Schritt */
+  font-weight: 400 !important;
+  background: #f4f6f8 !important; /* wie Verify */
+  color: #0f172a !important;
+  border-color: #d1d5db !important;
+}
+
+/* Mehr Rhythmus zwischen Zeilen */
+.grid.two{ gap: 14px !important; }
+.grid.one{ gap: 10px !important; }
+
+/* Feldtitel in Karten luftiger */
+.card h2 { margin-top: 6px !important; }
+
