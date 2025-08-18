@@ -109,16 +109,19 @@ textarea[disabled]{
   .grid.two{ grid-template-columns:1fr }
 }
 
-/* === Read-only Daten optisch wie im VERIFY: nicht fett, etwas grösser === */
+/* === Read-only Daten optisch wie im VERIFY: Typo/Spacing === */
 
-/* Label-Typo (Feldbezeichnungen) */
+/* Labels FETT wie im VERIFY (mit !important, damit es sicher greift) */
 .card label{
-  font-weight: 400 !important;    /* normal statt fett */
-  font-size: 15px !important;     /* leicht grösser */
+  font-weight: 600 !important;
+  font-size: 15px !important;
   color: #111 !important;
 }
 
-/* Inputs allgemein (noch einheitlich grösser) */
+/* Consent-Text NICHT fett (wie im VERIFY) */
+.consents label{ font-weight: 400 !important; }
+
+/* Inputs allgemein (einheitlich etwas größer) */
 .card input,
 .card select,
 .card textarea{
@@ -129,9 +132,9 @@ textarea[disabled]{
 .card input[disabled],
 .card select[disabled],
 .card textarea[disabled]{
-  font-size: 17px !important;     /* +1 Schritt */
+  font-size: 17px !important;
   font-weight: 400 !important;
-  background: #f4f6f8 !important; /* wie Verify */
+  background: #f4f6f8 !important;
   color: #0f172a !important;
   border-color: #d1d5db !important;
 }
@@ -142,12 +145,3 @@ textarea[disabled]{
 
 /* Feldtitel in Karten luftiger */
 .card h2 { margin-top: 6px !important; }
-
-/* Labels fett machen wie im VERIFY-Formular */
-.card label {
-  font-weight: 600;   /* etwas weniger stark als 700 -> harmonischer */
-  color: #111;        /* kräftiger Farbton für bessere Lesbarkeit */
-  font-size: 15px;    /* optional: leicht größer für bessere Balance */
-}
-
-
